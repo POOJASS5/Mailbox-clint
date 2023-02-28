@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { json } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import classes from "./Login.module.css";
 
@@ -8,11 +8,11 @@ const Login = () => {
   const emailRef = useRef();
   const passwordRef = useRef();
   const confirmPasswordRef = useRef();
+  const navigate = useNavigate();
 
   const hasAccountHandler = () => {
     setHasAccount((preState) => !preState);
   };
-
   let url;
   if (hasAccount) {
     url =
@@ -21,10 +21,8 @@ const Login = () => {
     url =
       "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBaeVdu1pcZTmJMQ5LAi5TrO_E9oMbeo98";
   }
-
   const loginFormHandler = async (event) => {
     event.preventDefault();
-
     if (
       !hasAccount &&
       passwordRef.current.value !== confirmPasswordRef.current.value
@@ -32,7 +30,6 @@ const Login = () => {
       alert("Password and Confirmed password are different");
       return;
     }
-
     try {
       const respense = await fetch(url, {
         method: "POST",
@@ -45,11 +42,11 @@ const Login = () => {
           "Content-Type": "application/json",
         },
       });
-
       const data = await respense.json();
 
       if (respense.ok) {
-        console.log("Login SuccessFul");
+        localStorage.setItem("idToken", JSON.stringify(data));
+        navigate("/home");
       } else {
         throw data.error;
       }
@@ -57,10 +54,10 @@ const Login = () => {
       alert(error.message);
     }
   };
-
   return (
     <div className={classes["main-form"]}>
       <form className={classes.form} onSubmit={loginFormHandler}>
+        <div className={classes.title}>{hasAccount ? "Login" : "Sign Up"}</div>
         <input type="email" placeholder="Email" ref={emailRef} required />
         <input
           type="password"
@@ -77,7 +74,7 @@ const Login = () => {
           />
         )}
         <div className={classes.button}>
-          <button type="submit">{hasAccount ? "Sign In" : "Sign Up"}</button>
+          <button type="submit">{hasAccount ? "Login" : "Sign Up"}</button>
         </div>
       </form>
       <div onClick={hasAccountHandler} className={classes.hasAccount}>
@@ -88,5 +85,4 @@ const Login = () => {
     </div>
   );
 };
-
 export default Login;
