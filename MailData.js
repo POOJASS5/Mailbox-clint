@@ -3,13 +3,13 @@ import { useDispatch } from "react-redux";
 
 import classes from "./MailData.module.css";
 import { replaceMail } from "../store/mail-actions";
+import { deleteMail } from "../store/mail-actions";
 
 const MailData = (props) => {
   const loggedUserEmail = JSON.parse(localStorage.getItem("idToken")).email;
   const emailUrl = loggedUserEmail.replace("@", "").replace(".", "");
   const [showBody, setShowBody] = useState(false);
   const dispatch = useDispatch();
-
   const readMailHandler = async () => {
     setShowBody((preState) => !preState);
     if (!props.mail.read) {
@@ -25,9 +25,7 @@ const MailData = (props) => {
             },
           }
         );
-
         const data = await response.json();
-
         if (!response.ok) {
           throw data.error;
         } else {
@@ -37,6 +35,11 @@ const MailData = (props) => {
         console.log(error.message);
       }
     }
+  };
+
+  // deleting mail
+  const removeMailHandler = () => {
+    dispatch(deleteMail(props.mail));
   };
   return (
     <div className={classes.complete}>
@@ -55,7 +58,8 @@ const MailData = (props) => {
           <div className={classes.title}>{props.mail.title}</div>
         </div>
         <div className={showBody ? classes.body : classes.notBody}>
-          {props.mail.text}
+          <div>{props.mail.text}</div>
+          <i onClick={removeMailHandler} className="ri-delete-bin-6-fill"></i>
         </div>
       </div>
     </div>

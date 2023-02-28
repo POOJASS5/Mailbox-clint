@@ -1,7 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-
 const initialState = { mailData: [], firstTime: true, unreadMessageCount: 0 };
-
 const mailSlice = createSlice({
   name: "mail",
   initialState: initialState,
@@ -19,8 +17,13 @@ const mailSlice = createSlice({
       state.mailData = [action.payload, ...state.mailData];
       // console.log(state.mails);
     },
-    remove(state, action) {},
+    remove(state, action) {
+      state.mailData = state.mailData.filter(
+        (mail) => mail.id !== action.payload.id
+      );
+    },
   },
 });
+
 export const mailActions = mailSlice.actions;
 export default mailSlice.reducer;
