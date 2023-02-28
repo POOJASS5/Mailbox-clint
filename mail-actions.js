@@ -1,5 +1,4 @@
 import { mailActions } from "../store/mail-slice";
-
 export const addMail = (mail, clearInput) => {
   const senderEmail = mail.from.replace("@", "").replace(".", "");
   const receiverEmail = mail.to.replace("@", "").replace(".", "");
@@ -9,31 +8,29 @@ export const addMail = (mail, clearInput) => {
         `https://mail-box-client-database-default-rtdb.firebaseio.com/${senderEmail}.json`,
         {
           method: "POST",
-          body: JSON.stringify(mail),
+          body: JSON.stringify({ ...mail, read: true }),
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
-
       await fetch(
         `https://mail-box-client-database-default-rtdb.firebaseio.com/${receiverEmail}.json`,
         {
           method: "POST",
-          body: JSON.stringify(mail),
+          body: JSON.stringify({ ...mail, read: false }),
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
-
       const data = await response.json();
-
       if (response.ok) {
         dispatch(
           mailActions.add({
             id: data.name,
             ...mail,
+            read: true,
           })
         );
         clearInput();
@@ -46,23 +43,32 @@ export const addMail = (mail, clearInput) => {
   };
 };
 
-export const replaceMail = (email) => {
+export const replaceMail = (emailUrl, loggedUserEmail) => {
   return async (dispatch) => {
     try {
       const response = await fetch(
-        `https://mail-box-client-database-default-rtdb.firebaseio.com/${email}.json`
+        `https://mail-box-client-database-default-rtdb.firebaseio.com/${emailUrl}.json`
       );
 
       const data = await response.json();
 
       if (response.ok) {
         let mailData = [];
+        let unreadMessageCount = 0;
 
         for (let key in data) {
           mailData = [{ id: key, ...data[key] }, ...mailData];
+          if (data[key].to === loggedUserEmail && data[key].read === false) {
+            unreadMessageCount++;
+          }
         }
 
-        dispatch(mailActions.replace(mailData));
+        dispatch(
+          mailActions.replace({
+            mailData: mailData,
+            unreadMessageCount: unreadMessageCount,
+          })
+        );
       } else {
         throw data.error;
       }
