@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-
 import classes from "./MailData.module.css";
 import { replaceMail } from "../store/mail-actions";
 import { deleteMail } from "../store/mail-actions";
-
 const MailData = (props) => {
   const loggedUserEmail = JSON.parse(localStorage.getItem("idToken")).email;
   const emailUrl = loggedUserEmail.replace("@", "").replace(".", "");
@@ -16,7 +14,7 @@ const MailData = (props) => {
       const email = props.mail.to.replace("@", "").replace(".", "");
       try {
         const response = await fetch(
-          `https://mail-box-client-88922-default-rtdb.firebaseio.com/${email}/${props.mail.id}.json`,
+          `https://mail-box-client-database-default-rtdb.firebaseio.com/${email}/${props.mail.id}.json`,
           {
             method: "PUT",
             body: JSON.stringify({ ...props.mail, read: true }),
@@ -36,7 +34,6 @@ const MailData = (props) => {
       }
     }
   };
-
   // deleting mail
   const removeMailHandler = () => {
     dispatch(deleteMail(props.mail));
